@@ -11,6 +11,13 @@ exports.getUsers = (req, res) => {
 
 // Tạo user mới
 exports.createUser = (req, res) => {
+    // Kiểm tra xem body có dữ liệu không
+    if (!req.body || !req.body.name || !req.body.email) {
+        return res.status(400).json({ 
+            message: 'Bad Request: name và email là bắt buộc. Vui lòng gửi Content-Type: application/json với body chứa name và email.' 
+        });
+    }
+
     const newUser = {
         id: Date.now(), // Tạo id đơn giản
         name: req.body.name,
