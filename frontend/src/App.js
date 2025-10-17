@@ -6,7 +6,7 @@ import Toast from './components/Toast';
 import './App.css';
 
 // Định nghĩa URL của backend để dễ dàng thay đổi khi cần
-const API_URL = "http://localhost:3000/api/users"; // Dùng port 3000 hoặc port của backend
+const API_URL = "http://localhost:8080/api/users"; // Dùng port 3000 hoặc port của backend
 
 function App() {
     // Tạo biến trạng thái 'users' để lưu trữ danh sách người dùng
