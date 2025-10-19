@@ -1,9 +1,12 @@
 .add-user-container {
   background: #ffffff;
-  padding: 30px;
+  padding: 32px;
   border-radius: 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   animation: fadeInLeft 0.8s ease;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
 }
 
 @keyframes fadeInLeft {
@@ -65,12 +68,14 @@
   transition: all 0.3s ease;
   outline: none;
   font-family: inherit;
+  background: #fafafa;
 }
 
 .form-group input:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   transform: translateY(-2px);
+  background: white;
 }
 
 .form-group input::placeholder {
@@ -78,17 +83,18 @@
 }
 
 .submit-btn {
-  padding: 14px 30px;
+  padding: 15px 32px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 10px;
+  margin-top: 12px;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  width: 100%;
 }
 
 .submit-btn:hover {
@@ -112,4 +118,20 @@
   transform: translateY(-50%);
   color: #aaa;
   pointer-events: none;
+}
+
+/* Error message styling */
+.input-error {
+  color: #f5576c;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  margin-left: 5px;
+  font-weight: 500;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }

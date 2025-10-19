@@ -5,12 +5,16 @@ import AddUser from './components/AddUser';
 import Toast from './components/Toast';
 import './App.css';
 
-// Định nghĩa URL của backend để dễ dàng thay đổi khi cần
-const API_URL = "http://localhost:8080/api/users"; // backend chạy trên port 8080 (xem backend/server.js)
+// Định nghĩa URL của backend để dễ dàng thay đổi khi cần.
+// Nếu muốn override, đặt REACT_APP_API_URL (ví dụ: http://api.example.com/api)
+const API_URL = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.replace(/\/$/, '')) || 'http://localhost:8080/api';
 
 function App() {
     // Tạo biến trạng thái 'users' để lưu trữ danh sách người dùng
     const [users, setUsers] = useState([]);
+    // Search và loading state
+    const [query, setQuery] = useState('');
+    const [loading, setLoading] = useState(false);
     
     // State cho toast notification
     const [toast, setToast] = useState(null);
@@ -27,12 +31,16 @@ function App() {
         // Định nghĩa một hàm để gọi API và lấy danh sách người dùng
         const fetchUsers = async () => {
             try {
-                const response = await axios.get(API_URL);
+                setLoading(true);
+                const response = await axios.get(`${API_URL}/users`);
                 // Chuẩn hoá mỗi user để có trường `id` (UserList, AddUser dùng `id`)
                 const normalized = response.data.map(u => ({ ...u, id: u._id }));
                 setUsers(normalized); // Cập nhật danh sách users với dữ liệu từ server
             } catch (error) {
                 console.error("Lỗi khi tải danh sách người dùng:", error);
+            }
+            finally {
+                setLoading(false);
             }
         };
 
@@ -43,7 +51,7 @@ function App() {
     const handleUserAdded = async (newUser) => {
         try {
             // Gửi dữ liệu người dùng mới lên server bằng phương thức POST
-            const response = await axios.post(API_URL, newUser);
+            const response = await axios.post(`${API_URL}/users`, newUser);
 
             // response.data là user vừa tạo. Chuẩn hoá để có `id`.
             const created = { ...response.data, id: response.data._id };
@@ -60,7 +68,7 @@ function App() {
     // Hàm xóa người dùng
     const handleDeleteUser = async (userId) => {
         try {
-            await axios.delete(`${API_URL}/${userId}`);
+            await axios.delete(`${API_URL}/users/${userId}`);
             // Cập nhật danh sách bằng cách loại bỏ user đã xóa
             setUsers(prev => prev.filter(user => user.id !== userId));
             showToast('🗑️ Đã xóa người dùng thành công!', 'success');
@@ -73,7 +81,7 @@ function App() {
     // Hàm cập nhật người dùng
     const handleUpdateUser = async (userId, updatedUser) => {
         try {
-            const response = await axios.put(`${API_URL}/${userId}`, updatedUser);
+            const response = await axios.put(`${API_URL}/users/${userId}`, updatedUser);
             // Cập nhật danh sách với thông tin mới
             const updated = { ...response.data, id: response.data._id };
             setUsers(prev => prev.map(user => user.id === userId ? updated : user));
@@ -87,12 +95,31 @@ function App() {
     return (
         <div className="App">
             <h1>🎯 Quản Lý Người Dùng</h1>
+            <div className="app-toolbar">
+                <div className="search-wrap">
+                    <input
+                        aria-label="Tìm kiếm người dùng"
+                        className="search-input"
+                        placeholder="Tìm theo tên hoặc email..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                </div>
+                {loading && (
+                    <div className="spinner" aria-hidden="true"></div>
+                )}
+            </div>
+
             <div className="app-container">
                 {/* Truyền hàm handleUserAdded xuống cho AddUser */}
                 <AddUser onUserAdded={handleUserAdded} />
                 {/* Truyền danh sách users và các hàm xử lý xuống cho UserList */}
                 <UserList 
-                    users={users} 
+                    users={users.filter(u => {
+                        if (!query.trim()) return true;
+                        const q = query.toLowerCase();
+                        return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+                    })} 
                     onDeleteUser={handleDeleteUser}
                     onUpdateUser={handleUpdateUser}
                 />

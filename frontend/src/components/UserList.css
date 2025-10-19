@@ -1,11 +1,12 @@
 .user-list-container {
   background: #ffffff;
-  padding: 30px;
+  padding: 32px;
   border-radius: 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   animation: fadeInRight 0.8s ease;
-  max-height: 600px;
+  max-height: 650px;
   overflow-y: auto;
+  min-height: 400px;
 }
 
 @keyframes fadeInRight {
@@ -51,11 +52,11 @@
 
 .user-item {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 20px;
-  border-radius: 12px;
+  padding: 18px 20px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
   transition: all 0.3s ease;
   border-left: 4px solid #667eea;
   animation: fadeInUp 0.5s ease;
@@ -249,15 +250,17 @@
 .no-users {
   text-align: center;
   color: #999;
-  padding: 40px 20px;
+  padding: 60px 20px;
   font-size: 1.1rem;
+  line-height: 1.8;
 }
 
 .no-users::before {
   content: '👥';
   display: block;
-  font-size: 3rem;
+  font-size: 3.5rem;
   margin-bottom: 15px;
+  opacity: 0.7;
 }
 
 /* Custom scrollbar cho user list */
