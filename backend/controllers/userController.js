@@ -1,70 +1,55 @@
 // backend/controllers/userController.js
-let users = [
-]; // Mảng tạm để lưu dữ liệu
+const User = require('../models/User');
 
-// Lấy tất cả user
-exports.getUsers = (req, res) => {
+// GET /api/users
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
     res.status(200).json(users);
+  } catch (e) {
+    res.status(500).json({ message: 'Server error', detail: e.message });
+  }
 };
 
-// Tạo user mới
-exports.createUser = (req, res) => {
-    // Kiểm tra xem body có dữ liệu không
-    if (!req.body || !req.body.name || !req.body.email) {
-        return res.status(400).json({ 
-            message: 'Bad Request: name và email là bắt buộc. Vui lòng gửi Content-Type: application/json với body chứa name và email.' 
-        });
+// POST /api/users
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email } = req.body || {};
+    if (!name?.trim() || !email?.trim()) {
+      return res.status(400).json({ message: 'name & email are required' });
     }
-
-    const newUser = {
-        id: Date.now(), // Tạo id đơn giản
-        name: req.body.name,
-        email: req.body.email
-    };
-    users.push(newUser);
-    res.status(201).json(newUser);
+    const created = await User.create({ name: name.trim(), email: email.trim() });
+    res.status(201).json(created);
+  } catch (e) {
+    if (e.code === 11000) { // duplicate email
+      return res.status(409).json({ message: 'Email already exists' });
+    }
+    res.status(500).json({ message: 'Server error', detail: e.message });
+  }
 };
 
-// Cập nhật user theo ID
-exports.updateUser = (req, res) => {
-    const userId = parseInt(req.params.id);
-    const userIndex = users.findIndex(u => u.id === userId);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ message: 'Không tìm thấy user' });
-    }
-
-    // Kiểm tra dữ liệu đầu vào
-    if (!req.body.name || !req.body.email) {
-        return res.status(400).json({ 
-            message: 'Bad Request: name và email là bắt buộc' 
-        });
-    }
-
-    // Cập nhật user
-    users[userIndex] = {
-        ...users[userIndex],
-        name: req.body.name,
-        email: req.body.email
-    };
-
-    res.status(200).json(users[userIndex]);
+// PUT /api/users/:id
+exports.updateUser = async (req, res) => {
+  try {
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updated) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(updated);
+  } catch (e) {
+    res.status(500).json({ message: 'Server error', detail: e.message });
+  }
 };
 
-// Xóa user theo ID
-exports.deleteUser = (req, res) => {
-    const userId = parseInt(req.params.id);
-    const userIndex = users.findIndex(u => u.id === userId);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ message: 'Không tìm thấy user' });
-    }
-
-    // Xóa user khỏi mảng
-    const deletedUser = users.splice(userIndex, 1);
-    
-    res.status(200).json({ 
-        message: 'Đã xóa user thành công',
-        user: deletedUser[0]
-    });
+// DELETE /api/users/:id
+exports.deleteUser = async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({ message: 'User deleted', user: deleted });
+  } catch (e) {
+    res.status(500).json({ message: 'Server error', detail: e.message });
+  }
 };
