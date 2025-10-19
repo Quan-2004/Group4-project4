@@ -6,7 +6,7 @@ import Toast from './components/Toast';
 import './App.css';
 
 // Định nghĩa URL của backend để dễ dàng thay đổi khi cần
-const API_URL = "http://localhost:8080/api/users"; // Dùng port 3000 hoặc port của backend
+const API_URL = "http://localhost:8080/api/users"; // backend chạy trên port 8080 (xem backend/server.js)
 
 function App() {
     // Tạo biến trạng thái 'users' để lưu trữ danh sách người dùng
@@ -28,7 +28,9 @@ function App() {
         const fetchUsers = async () => {
             try {
                 const response = await axios.get(API_URL);
-                setUsers(response.data); // Cập nhật danh sách users với dữ liệu từ server
+                // Chuẩn hoá mỗi user để có trường `id` (UserList, AddUser dùng `id`)
+                const normalized = response.data.map(u => ({ ...u, id: u._id }));
+                setUsers(normalized); // Cập nhật danh sách users với dữ liệu từ server
             } catch (error) {
                 console.error("Lỗi khi tải danh sách người dùng:", error);
             }
@@ -42,9 +44,12 @@ function App() {
         try {
             // Gửi dữ liệu người dùng mới lên server bằng phương thức POST
             const response = await axios.post(API_URL, newUser);
-            
+
+            // response.data là user vừa tạo. Chuẩn hoá để có `id`.
+            const created = { ...response.data, id: response.data._id };
+
             // Cập nhật danh sách người dùng trên giao diện mà không cần tải lại trang
-            setUsers([...users, response.data]);
+            setUsers(prev => [created, ...prev]); // thêm lên đầu
             showToast('✨ Thêm người dùng thành công!', 'success');
         } catch (error) {
             console.error("Lỗi khi thêm người dùng:", error);
@@ -57,7 +62,7 @@ function App() {
         try {
             await axios.delete(`${API_URL}/${userId}`);
             // Cập nhật danh sách bằng cách loại bỏ user đã xóa
-            setUsers(users.filter(user => user.id !== userId));
+            setUsers(prev => prev.filter(user => user.id !== userId));
             showToast('🗑️ Đã xóa người dùng thành công!', 'success');
         } catch (error) {
             console.error("Lỗi khi xóa người dùng:", error);
@@ -70,9 +75,8 @@ function App() {
         try {
             const response = await axios.put(`${API_URL}/${userId}`, updatedUser);
             // Cập nhật danh sách với thông tin mới
-            setUsers(users.map(user => 
-                user.id === userId ? response.data : user
-            ));
+            const updated = { ...response.data, id: response.data._id };
+            setUsers(prev => prev.map(user => user.id === userId ? updated : user));
             showToast('✏️ Cập nhật người dùng thành công!', 'success');
         } catch (error) {
             console.error("Lỗi khi cập nhật người dùng:", error);
