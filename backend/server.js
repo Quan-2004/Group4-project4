@@ -4,6 +4,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const mongoose = require('mongoose'); // ⟵ chỉ khai báo 1 lần
+const morgan = require('morgan');
 
 dotenv.config();
 
@@ -13,13 +14,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Log request (debug)
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log('Request headers:', req.headers);
-  console.log('Request body:', req.body);
-  next();
-});
+// Use morgan for request logging in development. Detailed headers/body logs only in non-production.
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    next();
+  });
+}
 
 // Routes
 app.get('/', (req, res) => {
