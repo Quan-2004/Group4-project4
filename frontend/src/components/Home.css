@@ -1,0 +1,170 @@
+/* Home.css - Styling cho trang chủ */
+
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.home-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    width: 100%;
+    max-width: 600px;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.home-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.home-header h1 {
+    color: #333;
+    margin-bottom: 16px;
+    font-size: 32px;
+}
+
+.user-welcome {
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.welcome-text {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.welcome-text strong {
+    color: #667eea;
+}
+
+.user-email {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.user-role {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+}
+
+.role-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.home-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #f5f5f5;
+    color: #333;
+    border: 2px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.home-info {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.home-info h3 {
+    color: #333;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.home-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.home-info li {
+    color: #666;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.home-info li:last-child {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .home-card {
+        padding: 30px 20px;
+    }
+
+    .home-header h1 {
+        font-size: 28px;
+    }
+
+    .home-actions {
+        flex-direction: column;
+    }
+
+    .welcome-text {
+        font-size: 16px;
+    }
+}
