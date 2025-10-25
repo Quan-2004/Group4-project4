@@ -7,6 +7,9 @@ const mongoose = require('mongoose'); // ⟵ chỉ khai báo 1 lần
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
 
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes'); // <-- THÊM DÒNG NÀY
+
 dotenv.config();
 
 const app = express();
@@ -38,6 +41,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
+// Khi có request đến '/api/users'
+app.use('/api/users', userRoutes); // <-- THÊM DÒNG NÀY
+
 // ---- KẾT NỐI MONGODB + START SERVER (chỉ 1 lần) ----
 const PORT = process.env.PORT || 8080;
 const MONGO_URI = process.env.MONGODB_URI;
@@ -48,3 +54,5 @@ mongoose.connect(MONGO_URI)
     app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
   })
   .catch(err => console.error('❌ MongoDB connection error:', err.message));
+
+
