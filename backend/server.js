@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const mongoose = require('mongoose'); // ⟵ chỉ khai báo 1 lần
 const morgan = require('morgan');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 app.use('/api', userRoutes);
-
+app.use('/api/auth', authRoutes); 
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
