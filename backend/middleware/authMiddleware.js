@@ -1,31 +1,38 @@
-// backend/middleware/authMiddleware.js
+// middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/User'); // Giả sử model User của bạn ở đây
 
-const protect = async (req, res, next) => {
+// Middleware 1: Xác thực Token
+exports.protect = async (req, res, next) => {
   let token;
 
-  // 1. Kiểm tra xem header có Authorization và bắt đầu bằng 'Bearer' không
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // 2. Tách lấy token (bỏ chữ 'Bearer ')
+      // Lấy token từ header
       token = req.headers.authorization.split(' ')[1];
 
-      // 3. Giải mã token để lấy id
+      // Xác thực token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // 4. Lấy thông tin user từ id (không lấy mật khẩu)
+      // Lấy thông tin user từ token (trừ password)
       req.user = await User.findById(decoded.id).select('-password');
-
-      next(); // 5. Cho phép request đi tiếp
+      next();
     } catch (error) {
-      res.status(401).json({ message: 'Token không hợp lệ' });
+      console.error(error);
+      res.status(401).json({ message: 'Not authorized, token failed' });
     }
   }
 
   if (!token) {
-    res.status(401).json({ message: 'Không có quyền truy cập, không tìm thấy token' });
+    res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 
-module.exports = { protect };
+// Middleware 2: Kiểm tra quyền Admin (RBAC) [cite: 287, 289]
+exports.isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'Admin') { // Giả sử trong schema User có trường 'role'
+    next();
+  } else {
+    res.status(403).json({ message: 'Not authorized as an Admin' });
+  }
+};
