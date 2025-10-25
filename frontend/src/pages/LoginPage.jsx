@@ -13,7 +13,7 @@ const LoginPage = () => {
     setMessage('');
     try {
       // 1. Gọi API login
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      const { data } = await axios.post('http://localhost:8080/api/auth/login', { email, password });
 
       // 2. LƯU TOKEN VÀO LOCAL STORAGE 
       localStorage.setItem('userInfo', JSON.stringify(data));

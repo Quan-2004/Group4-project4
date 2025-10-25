@@ -13,7 +13,7 @@ const RegisterPage = () => {
     e.preventDefault();
     setMessage(''); // Xóa thông báo cũ
     try {
-      const { data } = await axios.post('/api/auth/signup', { name, email, password });
+      await axios.post('http://localhost:8080/api/auth/signup', { name, email, password });
       setMessage('Đăng ký thành công! Đang chuyển đến trang đăng nhập...');
       // Tự động chuyển qua trang login sau 2 giây
       setTimeout(() => {
