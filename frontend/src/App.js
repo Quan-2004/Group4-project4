@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import UserList from './components/UserList';
 import AddUser from './components/AddUser';
 import Toast from './components/Toast';
+import Header from './components/Header';
+import RegisterPage from './pages/RegisterPage';
+import LoginPage from './pages/LoginPage';
+import ProfilePage from './pages/ProfilePage';
+import HomePage from './pages/HomePage';
 import './App.css';
 
 // Định nghĩa URL của backend để dễ dàng thay đổi khi cần.
 // Nếu muốn override, đặt REACT_APP_API_URL (ví dụ: http://api.example.com/api)
 const API_URL = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.replace(/\/$/, '')) || 'http://localhost:8080/api';
 
-function App() {
+// Component trang quản lý user (trang cũ)
+function UserManagementPage() {
     // Tạo biến trạng thái 'users' để lưu trữ danh sách người dùng
     const [users, setUsers] = useState([]);
     // Search và loading state
@@ -134,6 +141,22 @@ function App() {
                 />
             )}
         </div>
+    );
+}
+
+// Component App chính với Router
+function App() {
+    return (
+        <Router>
+            <Header />
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/users" element={<UserManagementPage />} />
+            </Routes>
+        </Router>
     );
 }
 

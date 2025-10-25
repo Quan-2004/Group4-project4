@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables (KHÔNG nên commit nhưng để demo project thì OK)
+# .env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
