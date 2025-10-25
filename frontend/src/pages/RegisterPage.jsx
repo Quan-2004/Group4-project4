@@ -36,27 +36,27 @@ const RegisterPage = () => {
       )}
       <form onSubmit={submitHandler}>
         <div className="form-group">
-          <label>Tên</label>
+          <label>👤 Họ và Tên</label>
           <input 
             type="text" 
             value={name} 
             onChange={(e) => setName(e.target.value)} 
             required 
-            placeholder="Nhập tên của bạn"
+            placeholder="Nhập họ và tên của bạn"
           />
         </div>
         <div className="form-group">
-          <label>Email</label>
+          <label>✉️ Email</label>
           <input 
             type="email" 
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
             required 
-            placeholder="Nhập email"
+            placeholder="example@email.com"
           />
         </div>
         <div className="form-group">
-          <label>Mật khẩu</label>
+          <label>🔒 Mật Khẩu</label>
           <input 
             type="password" 
             value={password} 
@@ -70,7 +70,7 @@ const RegisterPage = () => {
         </button>
       </form>
       <p className="auth-footer">
-        Đã có tài khoản? <a href="/login">Đăng nhập</a>
+        Đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
       </p>
     </div>
   );

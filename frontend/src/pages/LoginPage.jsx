@@ -36,17 +36,17 @@ const LoginPage = () => {
       )}
       <form onSubmit={submitHandler}>
         <div className="form-group">
-          <label>Email</label>
+          <label>✉️ Email</label>
           <input 
             type="email" 
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
             required 
-            placeholder="Nhập email"
+            placeholder="example@email.com"
           />
         </div>
         <div className="form-group">
-          <label>Mật khẩu</label>
+          <label>🔒 Mật Khẩu</label>
           <input 
             type="password" 
             value={password} 
@@ -60,7 +60,7 @@ const LoginPage = () => {
         </button>
       </form>
       <p className="auth-footer">
-        Chưa có tài khoản? <a href="/register">Đăng ký</a>
+        Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
       </p>
     </div>
   );

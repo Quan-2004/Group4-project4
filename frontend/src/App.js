@@ -8,6 +8,7 @@ import Header from './components/Header';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
+import HomePage from './pages/HomePage';
 import './App.css';
 
 // Định nghĩa URL của backend để dễ dàng thay đổi khi cần.
@@ -149,7 +150,7 @@ function App() {
         <Router>
             <Header />
             <Routes>
-                <Route path="/" element={<Navigate to="/users" />} />
+                <Route path="/" element={<HomePage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
