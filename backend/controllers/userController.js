@@ -52,11 +52,7 @@ exports.deleteUser = async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: 'Server error', detail: e.message });
   }
-};
-
-
-// backend/controllers/userController.js
-const User = require('../models/User');
+}
 
 // @desc    Lấy thông tin profile user
 // @route   GET /api/users/profile
