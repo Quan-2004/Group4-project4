@@ -49,12 +49,6 @@ const Header = () => {
                 </button>
               )}
               <button 
-                className={`nav-link ${location.pathname === '/users' ? 'active' : ''}`}
-                onClick={() => navigate('/users')}
-              >
-                Users
-              </button>
-              <button 
                 onClick={logoutHandler}
                 className="btn-logout-header"
               >
