@@ -174,6 +174,35 @@
   width: 100%;
 }
 
+/* Description text for auth pages */
+.auth-description {
+  text-align: center;
+  color: #718096;
+  font-size: 14px;
+  margin-bottom: 25px;
+  line-height: 1.6;
+  padding: 15px;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+/* Button variants */
+.btn-submit.btn-primary {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.btn-submit.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 /* Profile Page specific styles */
 .profile-container {
   max-width: 700px;
