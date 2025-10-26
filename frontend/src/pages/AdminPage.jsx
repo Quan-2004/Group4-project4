@@ -11,7 +11,8 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  const [confirmModal, setConfirmModal] = useState({ show: false, userId: null, userName: '' });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigate = useNavigate();
 
   // Lấy danh sách users từ backend
@@ -77,18 +78,14 @@ const AdminPage = () => {
 
   const showToast = (message, type) => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: '' }), 3000);
   };
 
-  // Mở modal xác nhận xóa
-  const handleDeleteClick = (userId, userName) => {
-    setConfirmModal({ show: true, userId, userName });
+  const closeToast = () => {
+    setToast({ show: false, message: '', type: '' });
   };
 
-  // Xác nhận xóa user
-  const confirmDelete = async () => {
-    const { userId } = confirmModal;
-    
+  // Xử lý xóa user
+  const handleDeleteUser = async (userId) => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = {
@@ -99,22 +96,43 @@ const AdminPage = () => {
 
       await axios.delete(`http://localhost:8080/api/users/${userId}`, config);
       
-      // Cập nhật danh sách sau khi xóa
-      setUsers(users.filter(user => user._id !== userId));
-      showToast('Đã xóa người dùng thành công', 'success');
-      setConfirmModal({ show: false, userId: null, userName: '' });
+      // Cập nhật danh sách users sau khi xóa thành công
+      setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
+      
+      showToast('🗑️ Xóa người dùng thành công!', 'success');
+      setShowDeleteModal(false);
+      setUserToDelete(null);
     } catch (error) {
       console.error('Lỗi khi xóa user:', error);
       showToast(
         error.response?.data?.message || 'Không thể xóa người dùng',
         'error'
       );
+      
+      if (error.response?.status === 401) {
+        localStorage.removeItem('userInfo');
+        navigate('/login');
+      }
     }
   };
 
-  // Hủy xóa
-  const cancelDelete = () => {
-    setConfirmModal({ show: false, userId: null, userName: '' });
+  // Hiển thị modal xác nhận xóa
+  const confirmDelete = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  // Xử lý khi xác nhận xóa
+  const handleDeleteConfirmed = () => {
+    if (userToDelete) {
+      handleDeleteUser(userToDelete._id);
+    }
+  };
+
+  // Đóng modal
+  const closeModal = () => {
+    setShowDeleteModal(false);
+    setUserToDelete(null);
   };
 
   // Lọc users theo search query
@@ -152,13 +170,11 @@ const AdminPage = () => {
 
   return (
     <div className="admin-page">
-      {toast.show && <Toast message={toast.message} type={toast.type} />}
-      
-      {confirmModal.show && (
-        <ConfirmModal
-          message={`Bạn có chắc chắn muốn xóa người dùng "${confirmModal.userName}"?`}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
+      {toast.show && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={closeToast}
         />
       )}
 
@@ -204,7 +220,7 @@ const AdminPage = () => {
                   <th>Email</th>
                   <th>Vai trò</th>
                   <th>Ngày tạo</th>
-                  <th>Hành động</th>
+                  <th>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -231,11 +247,11 @@ const AdminPage = () => {
                     <td>
                       <div className="action-buttons">
                         <button
-                          className="btn-delete"
-                          onClick={() => handleDeleteClick(user._id, user.name)}
+                          onClick={() => confirmDelete(user)}
+                          className="btn-delete-user"
                           title="Xóa người dùng"
                         >
-                          🗑️ Xóa
+                          🗑️
                         </button>
                       </div>
                     </td>
@@ -248,10 +264,18 @@ const AdminPage = () => {
 
         <div className="admin-footer">
           <p className="footer-note">
-            ⚠️ Lưu ý: Hãy thận trọng khi xóa người dùng. Hành động này không thể hoàn tác.
+            ℹ️ Trang quản lý người dùng - Có thể xóa người dùng
           </p>
         </div>
       </div>
+
+      {/* Modal xác nhận xóa */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={closeModal}
+        onConfirm={handleDeleteConfirmed}
+        userName={userToDelete?.name}
+      />
     </div>
   );
 };

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false }, // select: false để không trả về pass khi query
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+  role: { type: String, enum: ['User', 'Admin'], default: 'User' }
 }, { timestamps: true });
 
 // Mã hóa mật khẩu trước khi lưu
