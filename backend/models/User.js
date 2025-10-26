@@ -9,9 +9,21 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true, select: false },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
 
-    // THÊM 2 TRƯỜNG MỚI
+    // THÊM 2 TRƯỜNG RESET PASSWORD
     resetPasswordToken: String,
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+
+    // THÊM TRƯỜNG AVATAR
+    avatar: {
+        public_id: {
+            type: String,
+            default: 'default_avatar_public_id'
+        },
+        url: {
+            type: String,
+            default: 'https://i.ibb.co/4pDNDk1/avatar.png' // Avatar mặc định
+        }
+    }
 
 }, { timestamps: true });
 
