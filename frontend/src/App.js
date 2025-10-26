@@ -24,7 +24,7 @@ const getApiUrl = () => {
   
   // Nếu đang chạy trên Vercel (production) thì dùng backend Render
   if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://group4-project4-backend.onrender.com/api';
+    return 'https://group4-project4b6.onrender.com/api';
   }
   
   // Nếu chạy local thì dùng localhost
