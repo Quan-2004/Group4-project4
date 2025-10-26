@@ -251,7 +251,13 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      {toast.show && <Toast message={toast.message} type={toast.type} />}
+      {toast.show && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: '', type: '' })}
+        />
+      )}
       
       <div className="profile-container">
         <div className="profile-header">
