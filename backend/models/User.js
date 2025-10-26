@@ -1,26 +1,39 @@
-// (Trong file backend/models/User.js)
+// models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto'); // <--- THÊM DÒNG NÀY
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true, select: false }, // select: false để không trả về pass khi query
-  role: { type: String, enum: ['User', 'Admin'], default: 'User' }
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+
+    // THÊM 2 TRƯỜNG MỚI
+    resetPasswordToken: String,
+    resetPasswordExpire: Date
+
 }, { timestamps: true });
 
-// Mã hóa mật khẩu trước khi lưu
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
+// ... (Giữ nguyên hàm pre 'save' để hash mật khẩu) ...
 
-// Thêm method để so sánh mật khẩu
-userSchema.methods.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+// THÊM PHƯƠNG THỨC MỚI NÀY VÀO TRƯỚC DÒNG module.exports
+userSchema.methods.getResetPasswordToken = function() {
+    // 1. Tạo token thô
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    // 2. Hash token (để lưu vào DB)
+    this.resetPasswordToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
+
+    // 3. Đặt thời gian hết hạn (ví dụ: 15 phút)
+    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000; 
+
+    // 4. Trả về token thô (để gửi cho người dùng)
+    return resetToken;
 };
+
 
 module.exports = mongoose.model('User', userSchema);
