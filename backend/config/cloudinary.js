@@ -17,7 +17,7 @@ const storage = new CloudinaryStorage({
         folder: 'buoi5-avatars', // Tên thư mục trên Cloudinary
         allowed_formats: ['jpg', 'png', 'jpeg'],
         // public_id sẽ là tên file (ở đây ta dùng userId + timestamp)
-        public_id: (req, file) => `${req.user.id}_${Date.now()}`,
+        public_id: (req, file) => `${req.user._id}_${Date.now()}`,
     },
 });
 

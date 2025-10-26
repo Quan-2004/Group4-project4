@@ -6,18 +6,17 @@ const {
   deleteUser, 
   getUserProfile, 
   updateUserProfile,
-  updateUserProfileAvatar // <--- Import hàm mới
+  updateUserProfileAvatar // <--- Import hàm upload avatar
 } = require('../controllers/userController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
-const { upload } = require('../config/cloudinary'); // <--- Import upload
+const { upload } = require('../config/cloudinary'); // <--- Import upload middleware
 
 // Hoạt động 2: Profile Routes (phải đặt trước /:id)
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
 
-// THÊM ROUTE MỚI - Upload Avatar
-// Khi gọi, 'upload.single' chạy trước, xử lý file, rồi mới đến 'updateUserProfileAvatar'
+// Upload Avatar Route
 router.route('/profile/avatar')
   .put(protect, upload.single('avatar'), updateUserProfileAvatar);
 

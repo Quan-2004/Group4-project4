@@ -66,6 +66,7 @@ exports.getUserProfile = async (req, res) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    avatar: user.avatar // <--- Trả về avatar
   });
 };
 
@@ -108,11 +109,19 @@ exports.updateUserProfileAvatar = async (req, res) => {
       return res.status(400).json({ message: 'Vui lòng chọn 1 file ảnh' });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy user' });
+    }
 
     // (Tùy chọn nâng cao) Xóa ảnh cũ trên Cloudinary
     if (user.avatar && user.avatar.public_id !== 'default_avatar_public_id') {
-      await cloudinary.uploader.destroy(user.avatar.public_id);
+      try {
+        await cloudinary.uploader.destroy(user.avatar.public_id);
+      } catch (error) {
+        console.log('Không thể xóa ảnh cũ:', error.message);
+      }
     }
 
     // Cập nhật DB
@@ -129,6 +138,7 @@ exports.updateUserProfileAvatar = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Lỗi upload avatar:', error);
     res.status(500).json({ message: 'Lỗi server khi upload', error: error.message });
   }
 };

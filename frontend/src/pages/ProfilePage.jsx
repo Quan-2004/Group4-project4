@@ -11,6 +11,10 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   
+  // State cho upload avatar
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('https://i.ibb.co/4pDNDk1/avatar.png');
+  
   // Form data cho chế độ chỉnh sửa
   const [formData, setFormData] = useState({
     name: '',
@@ -42,6 +46,12 @@ const ProfilePage = () => {
         const { data } = await axios.get('http://localhost:8080/api/users/profile', config);
         
         setUserInfo(data);
+        
+        // Cập nhật avatar URL nếu có
+        if (data.avatar && data.avatar.url) {
+          setAvatarUrl(data.avatar.url);
+        }
+        
         setFormData({
           name: data.name,
           email: data.email,
@@ -174,13 +184,80 @@ const ProfilePage = () => {
     navigate('/login');
   };
 
+  // Hàm xử lý upload avatar
+  const uploadFileHandler = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Kiểm tra loại file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Chỉ chấp nhận file ảnh (JPG, JPEG, PNG)', 'error');
+      return;
+    }
+
+    // Kiểm tra kích thước file (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Kích thước file không được vượt quá 5MB', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    setUploading(true);
+
+    try {
+      const user = JSON.parse(localStorage.getItem('userInfo'));
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${user.token}`
+        }
+      };
+
+      // Gọi API upload avatar
+      const { data } = await axios.put(
+        'http://localhost:8080/api/users/profile/avatar',
+        formData,
+        config
+      );
+
+      // Cập nhật avatar URL trên UI
+      setAvatarUrl(data.avatar.url);
+      
+      // Cập nhật userInfo với avatar mới
+      const updatedUserInfo = {
+        ...user,
+        avatar: data.avatar
+      };
+      localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+
+      showToast('Upload avatar thành công!', 'success');
+    } catch (error) {
+      console.error('Lỗi khi upload avatar:', error);
+      showToast(
+        error.response?.data?.message || 'Không thể upload ảnh',
+        'error'
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!userInfo) {
     return <div className="loading-text">Đang tải...</div>;
   }
 
   return (
     <div className="profile-page">
-      {toast.show && <Toast message={toast.message} type={toast.type} />}
+      {toast.show && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: '', type: '' })}
+        />
+      )}
       
       <div className="profile-container">
         <div className="profile-header">
@@ -193,6 +270,33 @@ const ProfilePage = () => {
               ✏️ Chỉnh Sửa
             </button>
           )}
+        </div>
+
+        {/* Avatar Section */}
+        <div className="avatar-section">
+          <div className="avatar-container">
+            <img 
+              src={avatarUrl} 
+              alt="Avatar" 
+              className="profile-avatar"
+            />
+            {uploading && <div className="avatar-loading">Đang upload...</div>}
+          </div>
+          
+          <div className="avatar-upload">
+            <label htmlFor="avatar-input" className="btn-upload-avatar">
+              📷 {uploading ? 'Đang tải lên...' : 'Đổi Avatar'}
+            </label>
+            <input 
+              type="file" 
+              id="avatar-input"
+              accept="image/jpeg,image/jpg,image/png" 
+              onChange={uploadFileHandler}
+              disabled={uploading}
+              style={{ display: 'none' }}
+            />
+            <p className="avatar-hint">JPG, JPEG hoặc PNG (Tối đa 5MB)</p>
+          </div>
         </div>
 
         {!isEditing ? (
