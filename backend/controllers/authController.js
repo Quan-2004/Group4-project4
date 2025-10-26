@@ -43,24 +43,32 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log('[authController.login] attempt login for:', email);
     // 1. Tìm user bằng email
     // Phải dùng .select('+password') vì ta đã ẩn nó ở schema
     const user = await User.findOne({ email }).select('+password');
+    console.log('[authController.login] user found?', !!user, user?._id);
 
-    // 2. Kiểm tra user và mật khẩu có khớp không
-    if (user && (await user.matchPassword(password))) {
-      // 3. Trả về thông tin user và token
-      res.status(200).json({
+    if (user) {
+      console.log('[authController.login] hashed password present?', !!user.password);
+      // kiểm tra matchPassword và log kết quả (không in mật khẩu thô)
+      const matched = await user.matchPassword(password);
+      console.log('[authController.login] matchPassword result:', matched);
+      // nếu không khớp, gửi 401
+      if (!matched) {
+        return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+      }
+      // nếu khớp, tiếp tục trả token
+      return res.status(200).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
         token: generateToken(user._id),
       });
-    } else {
-      res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
+    // nếu user không tồn tại
+    res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

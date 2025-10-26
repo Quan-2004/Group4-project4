@@ -6,7 +6,7 @@ const crypto = require('crypto'); // <--- THÊM DÒNG NÀY
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
 
     // THÊM 2 TRƯỜNG MỚI
@@ -15,7 +15,23 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// ... (Giữ nguyên hàm pre 'save' để hash mật khẩu) ...
+// Hash mật khẩu trước khi lưu vào database
+userSchema.pre('save', async function(next) {
+    // Chỉ hash nếu password được thay đổi (hoặc tạo mới)
+    if (!this.isModified('password')) {
+        return next();
+    }
+    
+    // Hash password với salt rounds = 10
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+// Method để so sánh password khi đăng nhập
+userSchema.methods.matchPassword = async function(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
 // THÊM PHƯƠNG THỨC MỚI NÀY VÀO TRƯỚC DÒNG module.exports
 userSchema.methods.getResetPasswordToken = function() {
