@@ -30,6 +30,9 @@ const Header = () => {
               <div className="user-info">
                 <span className="user-avatar">👤</span>
                 <span className="user-name">{user.name}</span>
+                {user.role === 'Admin' && (
+                  <span className="admin-badge">👑 Admin</span>
+                )}
               </div>
               <button 
                 className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
@@ -37,6 +40,14 @@ const Header = () => {
               >
                 Profile
               </button>
+              {user.role === 'Admin' && (
+                <button 
+                  className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+                  onClick={() => navigate('/admin')}
+                >
+                  👨‍💼 Admin
+                </button>
+              )}
               <button 
                 className={`nav-link ${location.pathname === '/users' ? 'active' : ''}`}
                 onClick={() => navigate('/users')}

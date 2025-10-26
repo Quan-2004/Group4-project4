@@ -1,11 +1,18 @@
 // routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getUsers, deleteUser } = require('../controllers/userController');
+const { 
+  getUsers, 
+  deleteUser, 
+  getUserProfile, 
+  updateUserProfile 
+} = require('../controllers/userController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
-// Thêm các route từ Hoạt động 2 (Profile)
-// router.route('/profile').get(protect, getProfile).put(protect, updateProfile);
+// Hoạt động 2: Profile Routes (phải đặt trước /:id)
+router.route('/profile')
+  .get(protect, getUserProfile)
+  .put(protect, updateUserProfile);
 
 // Hoạt động 3: API Quản lý User (Admin)
 // GET /api/users - Lấy tất cả user (Chỉ Admin) 
