@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPages.css';
+import API_BASE from '../utils/api';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +16,8 @@ const ForgotPasswordPage = () => {
 
     try {
       // Gọi API forgot password
-      const { data } = await axios.post('http://localhost:8080/api/auth/forgot-password', { email });
+      const url = `${API_BASE || '/api'}/auth/forgot-password`;
+      const { data } = await axios.post(url, { email });
       
       setMessage(`✅ ${data.message}. Vui lòng kiểm tra email của bạn để lấy token reset mật khẩu.`);
       setEmail(''); // Clear form

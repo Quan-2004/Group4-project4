@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPages.css';
+import API_BASE from '../utils/api';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -12,8 +13,10 @@ const LoginPage = () => {
     e.preventDefault();
     setMessage('');
     try {
-      // 1. Gọi API login
-      const { data } = await axios.post('http://localhost:8080/api/auth/login', { email, password });
+  // 1. Gọi API login
+  const base = API_BASE || '/api';
+  const url = `${base}/auth/login`;
+  const { data } = await axios.post(url, { email, password });
 
       // 2. LƯU TOKEN VÀO LOCAL STORAGE 
       localStorage.setItem('userInfo', JSON.stringify(data));

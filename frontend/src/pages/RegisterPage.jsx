@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPages.css';
+import API_BASE from '../utils/api';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -13,7 +14,8 @@ const RegisterPage = () => {
     e.preventDefault();
     setMessage(''); // Xóa thông báo cũ
     try {
-      await axios.post('http://localhost:8080/api/auth/signup', { name, email, password });
+      const url = `${API_BASE || '/api'}/auth/signup`;
+      await axios.post(url, { name, email, password });
       setMessage('Đăng ký thành công! Đang chuyển đến trang đăng nhập...');
       // Tự động chuyển qua trang login sau 2 giây
       setTimeout(() => {
