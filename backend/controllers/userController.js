@@ -1,5 +1,6 @@
 // backend/controllers/userController.js
 const User = require('../models/User');
+const { cloudinary } = require('../config/cloudinary'); // <--- Import cloudinary
 
 // GET /api/users
 exports.getUsers = async (req, res) => {
@@ -94,5 +95,40 @@ exports.updateUserProfile = async (req, res) => {
     });
   } else {
     res.status(404).json({ message: 'Không tìm thấy user' });
+  }
+};
+
+// @desc    Cập nhật avatar
+// @route   PUT /api/users/profile/avatar
+// @access  Private
+exports.updateUserProfileAvatar = async (req, res) => {
+  try {
+    // req.file được tạo bởi middleware 'upload' (multer)
+    if (!req.file) {
+      return res.status(400).json({ message: 'Vui lòng chọn 1 file ảnh' });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    // (Tùy chọn nâng cao) Xóa ảnh cũ trên Cloudinary
+    if (user.avatar && user.avatar.public_id !== 'default_avatar_public_id') {
+      await cloudinary.uploader.destroy(user.avatar.public_id);
+    }
+
+    // Cập nhật DB
+    user.avatar = {
+      public_id: req.file.filename, // Multer-Cloudinary trả về filename (là public_id)
+      url: req.file.path // và path (là url)
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'Upload avatar thành công',
+      avatar: user.avatar
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server khi upload', error: error.message });
   }
 };
