@@ -15,8 +15,23 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import './App.css';
 
 // Định nghĩa URL của backend để dễ dàng thay đổi khi cần.
-// Nếu muốn override, đặt REACT_APP_API_URL (ví dụ: http://api.example.com/api)
-const API_URL = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.replace(/\/$/, '')) || 'http://localhost:8080/api';
+// Tự động detect môi trường: Production dùng Render, Development dùng localhost
+const getApiUrl = () => {
+  // Nếu có biến môi trường REACT_APP_API_URL thì dùng
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL.replace(/\/$/, '');
+  }
+  
+  // Nếu đang chạy trên Vercel (production) thì dùng backend Render
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://group4-project4-backend.onrender.com/api';
+  }
+  
+  // Nếu chạy local thì dùng localhost
+  return 'http://localhost:8080/api';
+};
+
+const API_URL = getApiUrl();
 
 // Component trang quản lý user (trang cũ)
 function UserManagementPage() {
