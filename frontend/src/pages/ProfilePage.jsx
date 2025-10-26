@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Toast from '../components/Toast';
 import './ProfilePage.css';
+import API_BASE from '../utils/api';
 
 const ProfilePage = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -42,8 +43,9 @@ const ProfilePage = () => {
           }
         };
 
-        // Gọi API GET /api/users/profile
-        const { data } = await axios.get('http://localhost:8080/api/users/profile', config);
+  // Gọi API GET /api/users/profile
+  const url = `${API_BASE || '/api'}/users/profile`;
+  const { data } = await axios.get(url, config);
         
         setUserInfo(data);
         
@@ -141,11 +143,8 @@ const ProfilePage = () => {
       }
 
       // Gọi API PUT /api/users/profile
-      const { data } = await axios.put(
-        'http://localhost:8080/api/users/profile',
-        updateData,
-        config
-      );
+  const url = `${API_BASE || '/api'}/users/profile`;
+  const { data } = await axios.put(url, updateData, config);
 
       // Cập nhật userInfo trong state và localStorage
       const updatedUserInfo = {
@@ -217,11 +216,8 @@ const ProfilePage = () => {
       };
 
       // Gọi API upload avatar
-      const { data } = await axios.put(
-        'http://localhost:8080/api/users/profile/avatar',
-        formData,
-        config
-      );
+  const url = `${API_BASE || '/api'}/users/profile/avatar`;
+  const { data } = await axios.put(url, formData, config);
 
       // Cập nhật avatar URL trên UI
       setAvatarUrl(data.avatar.url);

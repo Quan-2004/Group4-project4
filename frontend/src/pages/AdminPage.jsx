@@ -5,6 +5,7 @@ import axios from 'axios';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import './AdminPage.css';
+import API_BASE from '../utils/api';
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -26,7 +27,8 @@ const AdminPage = () => {
         }
       };
 
-      const { data } = await axios.get('http://localhost:8080/api/users', config);
+  const url = `${API_BASE || '/api'}/users`;
+  const { data } = await axios.get(url, config);
       setUsers(data);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách users:', error);
@@ -94,7 +96,8 @@ const AdminPage = () => {
         }
       };
 
-      await axios.delete(`http://localhost:8080/api/users/${userId}`, config);
+  const url = `${API_BASE || '/api'}/users/${userId}`;
+  await axios.delete(url, config);
       
       // Cập nhật danh sách users sau khi xóa thành công
       setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));

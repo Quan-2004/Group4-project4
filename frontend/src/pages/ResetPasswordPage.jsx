@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPages.css';
+import API_BASE from '../utils/api';
 
 const ResetPasswordPage = () => {
   const [token, setToken] = useState('');
@@ -30,10 +31,8 @@ const ResetPasswordPage = () => {
 
     try {
       // Gọi API reset password với token
-      const { data } = await axios.put(
-        `http://localhost:8080/api/auth/reset-password/${token}`,
-        { password }
-      );
+  const url = `${API_BASE || '/api'}/auth/reset-password/${token}`;
+  const { data } = await axios.put(url, { password });
       
       setMessage(`✅ ${data.message}. Đang chuyển đến trang đăng nhập...`);
       
