@@ -12,7 +12,16 @@ dotenv.config();
 const app = express();
 
 // ----- MIDDLEWARES -----
-app.use(cors());
+// CORS Configuration - Cho phép frontend truy cập
+const allowedOrigins = [
+  'http://localhost:3000', // Local development
+  process.env.CLIENT_URL   // Production frontend URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins.length > 1 ? allowedOrigins : '*',
+  credentials: true
+}));
 app.use(express.json());
 
 if (process.env.NODE_ENV !== 'production') {
