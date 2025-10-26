@@ -1,98 +1,135 @@
 // backend/controllers/userController.js
 const User = require('../models/User');
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
+const asyncHandler = require('express-async-handler');
 
 // GET /api/users
-exports.getUsers = async (req, res) => {
-  try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.status(200).json(users);
-  } catch (e) {
-    res.status(500).json({ message: 'Server error', detail: e.message });
-  }
-};
-
-// POST /api/users
-exports.createUser = async (req, res) => {
-  try {
-    const { name, email } = req.body || {};
-    if (!name?.trim() || !email?.trim()) {
-      return res.status(400).json({ message: 'name & email are required' });
-    }
-    const created = await User.create({ name: name.trim(), email: email.trim() });
-    res.status(201).json(created);
-  } catch (e) {
-    if (e.code === 11000) { // duplicate email
-      return res.status(409).json({ message: 'Email already exists' });
-    }
-    res.status(500).json({ message: 'Server error', detail: e.message });
-  }
-};
-
-// PUT /api/users/:id
-exports.updateUser = async (req, res) => {
-  try {
-    const updated = await User.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!updated) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json(updated);
-  } catch (e) {
-    res.status(500).json({ message: 'Server error', detail: e.message });
-  }
-};
+const getUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().sort({ createdAt: -1 });
+  res.status(200).json(users);
+});
 
 // DELETE /api/users/:id
-exports.deleteUser = async (req, res) => {
-  try {
-    const deleted = await User.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json({ message: 'User deleted', user: deleted });
-  } catch (e) {
-    res.status(500).json({ message: 'Server error', detail: e.message });
+const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (user) {
+    res.json({ message: 'User removed' });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
   }
-}
+});
 
-// @desc    Lấy thông tin profile user
-// @route   GET /api/users/profile
-// @access  Private (đã được 'protect' bảo vệ)
-exports.getUserProfile = async (req, res) => {
-  // req.user đã được gán từ middleware 'protect'
-  const user = req.user;
-  res.status(200).json({
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-  });
-};
-
-// @desc    Cập nhật thông tin profile user
-// @route   PUT /api/users/profile
-// @access  Private
-exports.updateUserProfile = async (req, res) => {
+// GET /api/users/profile
+const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
 
+// PUT /api/users/profile
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  
   if (user) {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
-
-    // Nếu user có nhập mật khẩu mới
+    
     if (req.body.password) {
-      user.password = req.body.password; // Hook 'pre-save' trong User.js sẽ tự động hash
+      user.password = req.body.password;
     }
 
     const updatedUser = await user.save();
 
-    res.status(200).json({
+    res.json({
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
-      // Trả về token mới nếu bạn muốn, nhưng không bắt buộc
     });
   } else {
-    res.status(404).json({ message: 'Không tìm thấy user' });
+    res.status(404);
+    throw new Error('User not found');
   }
+});
+
+// POST /api/users/forgot-password
+const forgotPassword = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const resetToken = crypto.randomBytes(20).toString('hex');
+  user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  await user.save();
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Password Reset Request',
+      message: `You are receiving this email because you (or someone else) has requested a password reset. Please make a PUT request to: \n\n ${
+        req.protocol
+      }://${req.get(
+        'host'
+      )}/api/users/reset-password/${resetToken}`
+    });
+
+    res.json({ message: 'Email sent' });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.status(500);
+    throw new Error('Email could not be sent');
+  }
+});
+
+// PUT /api/users/reset-password/:resetToken
+const resetPassword = asyncHandler(async (req, res) => {
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.resetToken)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    res.status(400);
+    throw new Error('Invalid or expired reset token');
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  res.json({ message: 'Password updated' });
+});
+
+module.exports = {
+  getUsers,
+  deleteUser,
+  getUserProfile,
+  updateUserProfile,
+  forgotPassword,
+  resetPassword
 };
